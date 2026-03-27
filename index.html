@@ -3,580 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>WormGPT - AI Assistant</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 100%);
-      color: #eef2ff;
-      min-height: 100vh;
-    }
-
-    /* Header */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 20px;
-      background: rgba(10, 10, 15, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(124, 58, 237, 0.2);
-      z-index: 100;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .menu-btn {
-      width: 36px;
-      height: 36px;
-      background: rgba(124, 58, 237, 0.1);
-      border: 1px solid rgba(124, 58, 237, 0.3);
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .menu-btn span {
-      width: 18px;
-      height: 2px;
-      background: #7c3aed;
-      border-radius: 2px;
-    }
-
-    .chatgpt-title {
-      font-size: 18px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .header-right {
-      display: flex;
-      gap: 12px;
-    }
-
-    .newchat-top, .tg-btn {
-      width: 36px;
-      height: 36px;
-      background: rgba(124, 58, 237, 0.1);
-      border: 1px solid rgba(124, 58, 237, 0.3);
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: #7c3aed;
-    }
-
-    .telegram-svg {
-      width: 20px;
-      height: 20px;
-      fill: #7c3aed;
-    }
-
-    /* Main Layout */
-    .main {
-      display: flex;
-      min-height: 100vh;
-      padding-top: 60px;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      left: -280px;
-      top: 0;
-      width: 280px;
-      height: 100vh;
-      background: rgba(15, 15, 26, 0.95);
-      backdrop-filter: blur(12px);
-      border-right: 1px solid rgba(124, 58, 237, 0.2);
-      transition: left 0.3s ease;
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar.open {
-      left: 0;
-    }
-
-    .sidebar-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      z-index: 150;
-    }
-
-    .sidebar-backdrop.open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .side-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      border-bottom: 1px solid rgba(124, 58, 237, 0.2);
-    }
-
-    .side-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #7c3aed;
-    }
-
-    .side-close {
-      background: none;
-      border: none;
-      color: #9ca3af;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    .side-actions {
-      padding: 20px;
-    }
-
-    .side-btn {
-      width: 100%;
-      padding: 12px;
-      background: #7c3aed;
-      border: none;
-      border-radius: 12px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* Content */
-    .content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      margin-left: 0;
-      transition: margin-left 0.3s ease;
-    }
-
-    .chat-area {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Chat Messages */
-    .message {
-      max-width: 80%;
-      margin-bottom: 16px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .message.user {
-      align-self: flex-end;
-    }
-
-    .message.ai {
-      align-self: flex-start;
-    }
-
-    .message-bubble {
-      padding: 12px 16px;
-      border-radius: 18px;
-      word-wrap: break-word;
-    }
-
-    .message.user .message-bubble {
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      color: white;
-    }
-
-    .message.ai .message-bubble {
-      background: rgba(30, 30, 45, 0.8);
-      border: 1px solid rgba(124, 58, 237, 0.3);
-    }
-
-    .message-time {
-      font-size: 10px;
-      color: #6b7280;
-      margin-top: 4px;
-      padding: 0 8px;
-    }
-
-    /* Hero Section */
-    .hero {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: calc(100vh - 180px);
-      text-align: center;
-    }
-
-    .image-section {
-      max-width: 500px;
-    }
-
-    .main-title {
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-bottom: 12px;
-    }
-
-    .subtitle {
-      color: #9ca3af;
-      font-size: 14px;
-    }
-
-    /* Input Container */
-    .input-container {
-      padding: 20px;
-      border-top: 1px solid rgba(124, 58, 237, 0.2);
-      background: rgba(10, 10, 15, 0.8);
-    }
-
-    .input-shell {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .input-wrapper {
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      background: rgba(30, 30, 45, 0.8);
-      border-radius: 24px;
-      padding: 8px 12px;
-      border: 1px solid rgba(124, 58, 237, 0.3);
-    }
-
-    .plus-btn {
-      width: 36px;
-      height: 36px;
-      background: rgba(124, 58, 237, 0.2);
-      border: none;
-      border-radius: 50%;
-      color: #7c3aed;
-      font-size: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .plus-btn:hover {
-      background: #7c3aed;
-      color: white;
-    }
-
-    .input-field {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 16px;
-      padding: 8px 0;
-      resize: none;
-      font-family: inherit;
-      max-height: 120px;
-    }
-
-    .input-field:focus {
-      outline: none;
-    }
-
-    .input-field::placeholder {
-      color: #6b7280;
-    }
-
-    .input-actions {
-      display: flex;
-      align-items: center;
-    }
-
-    .action-btn {
-      width: 36px;
-      height: 36px;
-      background: #7c3aed;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .action-btn.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .plane {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* Upload Menu */
-    .upload-menu {
-      position: absolute;
-      bottom: 70px;
-      left: 20px;
-      background: #1a1a2e;
-      border-radius: 12px;
-      padding: 8px;
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      border: 1px solid #7c3aed;
-      z-index: 100;
-    }
-
-    .upload-menu.show {
-      display: flex;
-    }
-
-    .upload-menu-item {
-      padding: 10px 16px;
-      background: transparent;
-      border: none;
-      color: white;
-      cursor: pointer;
-      text-align: left;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .upload-menu-item:hover {
-      background: #7c3aed;
-    }
-
-    /* Upload Container */
-    .upload-container {
-      position: fixed;
-      bottom: 90px;
-      left: 20px;
-      right: 20px;
-      max-width: 400px;
-      background: #1a1a2e;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      border: 1px solid #7c3aed;
-      z-index: 100;
-      display: none;
-    }
-
-    .upload-container.show {
-      display: block;
-    }
-
-    .upload-preview {
-      margin-bottom: 12px;
-      max-height: 200px;
-      overflow: auto;
-      text-align: center;
-    }
-
-    .upload-preview img {
-      max-width: 100%;
-      max-height: 150px;
-      border-radius: 8px;
-    }
-
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: #2a2a3e;
-      border-radius: 8px;
-    }
-
-    .file-icon {
-      font-size: 32px;
-    }
-
-    .file-details {
-      flex: 1;
-    }
-
-    .file-name {
-      font-weight: bold;
-      color: white;
-      word-break: break-all;
-    }
-
-    .file-size {
-      font-size: 12px;
-      color: #aaa;
-    }
-
-    .upload-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-
-    .upload-cancel, .upload-send {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .upload-cancel {
-      background: #3a3a4e;
-      color: white;
-    }
-
-    .upload-send {
-      background: #7c3aed;
-      color: white;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      right: 20px;
-      background: #1f2937;
-      border-radius: 12px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s ease;
-      z-index: 150;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .toast-dot {
-      width: 8px;
-      height: 8px;
-      background: #10b981;
-      border-radius: 50%;
-    }
-
-    .toast-text {
-      flex: 1;
-      font-size: 14px;
-    }
-
-    .toast-close {
-      background: none;
-      border: none;
-      color: #9ca3af;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    /* Loading */
-    .loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 200;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(124, 58, 237, 0.3);
-      border-top-color: #7c3aed;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #1f2937;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #7c3aed;
-      border-radius: 3px;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .message {
-        max-width: 90%;
-      }
-      
-      .main-title {
-        font-size: 24px;
-      }
-    }
-  </style>
+  <title>NaszGPT</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="telegram-webapp.js"></script>
 </head>
 <body>
 
+  <div class="intro-overlay" id="introOverlay" aria-hidden="true">
+    <!-- ... (intro-overlay tetap sama seperti aslinya) ... -->
+  </div>
+
   <header class="header">
     <div class="header-left">
-      <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
-      <div class="chatgpt-title" id="titleBtn">WormGPT</div>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span></button>
+      <div class="chatgpt-title" id="titleBtn">NaszGPT</div>
     </div>
     <div class="header-right">
       <button class="newchat-top" id="newChatTopBtn" aria-label="Mulai chat baru">+</button>
       <button class="tg-btn" id="telegramBtn" aria-label="Telegram">
-        <svg class="telegram-svg" viewBox="0 0 240 240">
+        <svg class="telegram-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path fill="currentColor" d="M120 0C53.7 0 0 53.7 0 120s53.7 120 120 120 120-53.7 120-120S186.3 0 120 0zm58.7 80.7-22.6 106.5c-1.7 7.6-6.2 9.5-12.6 5.9l-34.8-25.7-16.8 16.2c-1.9 1.9-3.5 3.5-7.2 3.5l2.5-35.8 65.2-58.9c2.8-2.5-.6-3.9-4.3-1.4l-80.6 50.7-34.7-10.8c-7.5-2.3-7.7-7.5 1.6-11.2l135.8-52.4c6.3-2.3 11.8 1.5 9.5 12.4z"/>
         </svg>
       </button>
@@ -588,7 +34,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="side-top">
         <div class="side-title">Menu</div>
-        <button class="side-close" id="sideClose">✕</button>
+        <button class="side-close" id="sideClose" aria-label="Tutup">✕</button>
       </div>
       <div class="side-actions">
         <button class="side-btn" id="newChatBtn">Mulai chat baru</button>
@@ -597,10 +43,17 @@
 
     <section class="content">
       <div class="chat-area" id="chatArea">
-        <div class="hero" id="hero">
-          <div class="image-section">
-            <h1 class="main-title">WormGPT Chatbot V1.0</h1>
-            <p class="subtitle">AI Assistant tanpa batasan - Upload file, gambar, dokumen, dan chat dengan AI</p>
+        <div class="center-wrap" id="chatWrap">
+          <div class="hero" id="hero">
+            <div class="image-section" id="imageFeatures">
+              <div class="image-stack">
+                <div class="image-card"></div>
+                <div class="image-card"></div>
+                <div class="image-card"></div>
+              </div>
+              <h1 class="main-title">WormGPT Chatbot V1.0</h1>
+              <p class="subtitle">Chatbot tanpa batasan dan tanpa aturan, generasi baru wormgpt</p>
+            </div>
           </div>
         </div>
       </div>
@@ -609,15 +62,23 @@
         <div class="input-shell">
           <div class="input-wrapper">
             <button class="plus-btn" id="plusBtn" aria-label="Tambah">+</button>
+            <!-- UPLOAD MENU (TAMBAHKAN) -->
             <div class="upload-menu" id="uploadMenu">
               <button class="upload-menu-item" data-type="image">📷 Upload Gambar</button>
               <button class="upload-menu-item" data-type="document">📄 Upload Dokumen</button>
               <button class="upload-menu-item" data-type="file">📁 Upload File</button>
             </div>
-            <textarea class="input-field" placeholder="Tanyakan apa saja kepada WormGPT..." id="chatInput" rows="1"></textarea>
+            <textarea
+              class="input-field"
+              placeholder="Berikan pertanyaan kepada WormGPT"
+              id="chatInput"
+              rows="1"
+              autocomplete="off"
+            ></textarea>
             <div class="input-actions">
-              <button class="action-btn disabled" id="actionBtn" disabled>
-                <svg class="plane" viewBox="0 0 24 24">
+              <button class="action-btn disabled" id="actionBtn" aria-label="Kirim" disabled>
+                <div class="send-glow" aria-hidden="true"></div>
+                <svg class="plane" id="sendIcon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path fill="white" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                 </svg>
               </button>
@@ -628,6 +89,7 @@
     </section>
   </div>
 
+  <!-- UPLOAD CONTAINER (TAMBAHKAN) -->
   <div class="upload-container" id="uploadContainer">
     <div class="upload-preview" id="uploadPreview"></div>
     <div class="upload-actions">
@@ -636,302 +98,12 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">
-    <div class="toast-dot"></div>
-    <div class="toast-text" id="toastText">Fitur ini masih dalam pemeliharaan</div>
-    <button class="toast-close" id="toastClose">✕</button>
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="toast-dot" aria-hidden="true"></div>
+    <div class="toast-text" id="toastText">Fiture ini masih dalam pemeliharaan</div>
+    <button class="toast-close" id="toastClose" aria-label="Tutup">✕</button>
   </div>
 
-  <script>
-    // ==================== DOM Elements ====================
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-    const sideClose = document.getElementById('sideClose');
-    const newChatBtn = document.getElementById('newChatBtn');
-    const newChatTopBtn = document.getElementById('newChatTopBtn');
-    const chatInput = document.getElementById('chatInput');
-    const actionBtn = document.getElementById('actionBtn');
-    const chatArea = document.getElementById('chatArea');
-    const hero = document.getElementById('hero');
-    const plusBtn = document.getElementById('plusBtn');
-    const uploadMenu = document.getElementById('uploadMenu');
-    const uploadContainer = document.getElementById('uploadContainer');
-    const uploadPreview = document.getElementById('uploadPreview');
-    const uploadCancel = document.getElementById('uploadCancel');
-    const uploadSend = document.getElementById('uploadSend');
-    const toast = document.getElementById('toast');
-    const toastText = document.getElementById('toastText');
-    const toastClose = document.getElementById('toastClose');
-
-    // ==================== Variables ====================
-    let sessionId = localStorage.getItem('sessionId') || generateSessionId();
-    let currentUploadFile = null;
-    let currentUploadType = null;
-    let messages = [];
-
-    // Save session ID
-    localStorage.setItem('sessionId', sessionId);
-
-    function generateSessionId() {
-      return 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    // ==================== Sidebar ====================
-    function openSidebar() {
-      sidebar.classList.add('open');
-      sidebarBackdrop.classList.add('open');
-    }
-
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      sidebarBackdrop.classList.remove('open');
-    }
-
-    menuBtn.addEventListener('click', openSidebar);
-    sideClose.addEventListener('click', closeSidebar);
-    sidebarBackdrop.addEventListener('click', closeSidebar);
-
-    // ==================== New Chat ====================
-    function resetChat() {
-      messages = [];
-      sessionId = generateSessionId();
-      localStorage.setItem('sessionId', sessionId);
-      
-      const chatWrap = document.getElementById('chatWrap');
-      if (chatWrap) chatWrap.remove();
-      
-      const newHero = document.createElement('div');
-      newHero.className = 'hero';
-      newHero.id = 'hero';
-      newHero.innerHTML = `
-        <div class="image-section">
-          <h1 class="main-title">WormGPT Chatbot V1.0</h1>
-          <p class="subtitle">AI Assistant tanpa batasan - Upload file, gambar, dokumen, dan chat dengan AI</p>
-        </div>
-      `;
-      chatArea.appendChild(newHero);
-      
-      chatInput.value = '';
-      actionBtn.disabled = true;
-      actionBtn.classList.add('disabled');
-    }
-
-    newChatBtn.addEventListener('click', resetChat);
-    newChatTopBtn.addEventListener('click', resetChat);
-
-    // ==================== Chat Functions ====================
-    function addMessageToChat(text, sender) {
-      const heroElement = document.getElementById('hero');
-      if (heroElement) heroElement.remove();
-      
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${sender}`;
-      messageDiv.innerHTML = `
-        <div class="message-bubble">${escapeHtml(text)}</div>
-        <div class="message-time">${new Date().toLocaleTimeString()}</div>
-      `;
-      chatArea.appendChild(messageDiv);
-      
-      messages.push({ sender, text, time: new Date().toISOString() });
-      chatArea.scrollTop = chatArea.scrollHeight;
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML.replace(/\n/g, '<br>');
-    }
-
-    function showLoading() {
-      const loadingDiv = document.createElement('div');
-      loadingDiv.className = 'loading';
-      loadingDiv.id = 'loadingOverlay';
-      loadingDiv.innerHTML = '<div class="spinner"></div>';
-      document.body.appendChild(loadingDiv);
-    }
-
-    function hideLoading() {
-      const loading = document.getElementById('loadingOverlay');
-      if (loading) loading.remove();
-    }
-
-    function showToast(message, duration = 3000) {
-      toastText.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), duration);
-    }
-
-    toastClose.addEventListener('click', () => toast.classList.remove('show'));
-
-    // ==================== Send Message to AI ====================
-    async function sendMessage() {
-      const text = chatInput.value.trim();
-      if (!text) return;
-
-      addMessageToChat(text, 'user');
-      chatInput.value = '';
-      actionBtn.disabled = true;
-      actionBtn.classList.add('disabled');
-      showLoading();
-
-      try {
-        const response = await fetch('/api/wormgpt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, sessionId })
-        });
-
-        const data = await response.json();
-        hideLoading();
-
-        if (data.response) {
-          addMessageToChat(data.response, 'ai');
-        } else if (data.error) {
-          addMessageToChat(`Error: ${data.error}`, 'ai');
-        }
-      } catch (error) {
-        hideLoading();
-        addMessageToChat(`Error: ${error.message}`, 'ai');
-        showToast('Gagal mengirim pesan');
-      }
-    }
-
-    // ==================== Input Handling ====================
-    chatInput.addEventListener('input', () => {
-      const hasText = chatInput.value.trim().length > 0;
-      actionBtn.disabled = !hasText;
-      if (hasText) {
-        actionBtn.classList.remove('disabled');
-      } else {
-        actionBtn.classList.add('disabled');
-      }
-      
-      chatInput.style.height = 'auto';
-      chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
-    });
-
-    chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (!actionBtn.disabled) sendMessage();
-      }
-    });
-
-    actionBtn.addEventListener('click', sendMessage);
-
-    // ==================== Upload Functions ====================
-    plusBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      uploadMenu.classList.toggle('show');
-    });
-
-    document.querySelectorAll('.upload-menu-item').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const type = btn.dataset.type;
-        currentUploadType = type;
-        uploadMenu.classList.remove('show');
-        
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        
-        if (type === 'image') {
-          fileInput.accept = 'image/*';
-        } else if (type === 'document') {
-          fileInput.accept = '.pdf,.doc,.docx,.txt,.js,.json,.html,.css';
-        } else {
-          fileInput.accept = '*/*';
-        }
-        
-        fileInput.onchange = (event) => {
-          const file = event.target.files[0];
-          if (file) {
-            currentUploadFile = file;
-            showUploadPreview(file);
-          }
-        };
-        
-        fileInput.click();
-      });
-    });
-
-    function showUploadPreview(file) {
-      uploadPreview.innerHTML = '';
-      
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          uploadPreview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        const info = document.createElement('div');
-        info.className = 'file-info';
-        info.innerHTML = `
-          <div class="file-icon">📄</div>
-          <div class="file-details">
-            <div class="file-name">${escapeHtml(file.name)}</div>
-            <div class="file-size">${(file.size / 1024).toFixed(2)} KB</div>
-          </div>
-        `;
-        uploadPreview.appendChild(info);
-      }
-      
-      uploadContainer.classList.add('show');
-    }
-
-    uploadCancel.addEventListener('click', () => {
-      currentUploadFile = null;
-      currentUploadType = null;
-      uploadContainer.classList.remove('show');
-      uploadPreview.innerHTML = '';
-    });
-
-    uploadSend.addEventListener('click', async () => {
-      if (!currentUploadFile) return;
-      
-      const formData = new FormData();
-      formData.append('file', currentUploadFile);
-      formData.append('type', currentUploadType);
-      formData.append('sessionId', sessionId);
-      
-      addMessageToChat(`📎 Uploading: ${currentUploadFile.name}`, 'user');
-      showLoading();
-      
-      try {
-        const response = await fetch('/api/wormgpt?action=upload', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          addMessageToChat(`✅ File uploaded: ${currentUploadFile.name}\n\n${result.response || 'File telah diproses oleh AI.'}`, 'ai');
-        } else {
-          addMessageToChat(`❌ Upload failed: ${result.error}`, 'ai');
-          showToast(result.error);
-        }
-      } catch (error) {
-        addMessageToChat(`❌ Error: ${error.message}`, 'ai');
-        showToast('Gagal upload file');
-      } finally {
-        hideLoading();
-        currentUploadFile = null;
-        currentUploadType = null;
-        uploadContainer.classList.remove('show');
-        uploadPreview.innerHTML = '';
-      }
-    });
-
-    // Close upload menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!plusBtn.contains(e.target) && !uploadMenu.contains(e.target)) {
-        uploadMenu.classList.remove('show');
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
