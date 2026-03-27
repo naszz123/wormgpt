@@ -104,6 +104,141 @@ function addDownloadButtonsToCodeBlocks() {
   }, 100);
 }
 
+// ==================== UPLOAD FUNCTIONS ====================
+let currentUploadFile = null;
+let currentUploadType = null;
+
+// Toggle upload menu
+document.getElementById('plusBtn').addEventListener('click', () => {
+  const menu = document.getElementById('uploadMenu');
+  menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+});
+
+// Handle upload menu items
+document.querySelectorAll('.upload-menu-item').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const type = btn.dataset.type;
+    currentUploadType = type;
+    document.getElementById('uploadMenu').style.display = 'none';
+    
+    // Create hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    
+    if (type === 'image') {
+      fileInput.accept = 'image/*';
+    } else if (type === 'document') {
+      fileInput.accept = '.pdf,.doc,.docx,.txt';
+    } else {
+      fileInput.accept = '*/*';
+    }
+    
+    fileInput.onchange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        currentUploadFile = file;
+        showUploadPreview(file);
+      }
+    };
+    
+    fileInput.click();
+  });
+});
+
+// Show preview of uploaded file
+function showUploadPreview(file) {
+  const container = document.getElementById('uploadContainer');
+  const preview = document.getElementById('uploadPreview');
+  
+  preview.innerHTML = '';
+  
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '150px';
+      img.style.borderRadius = '8px';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    const info = document.createElement('div');
+    info.className = 'file-info';
+    info.innerHTML = `
+      <div class="file-icon">📄</div>
+      <div class="file-details">
+        <div class="file-name">${file.name}</div>
+        <div class="file-size">${(file.size / 1024).toFixed(2)} KB</div>
+      </div>
+    `;
+    preview.appendChild(info);
+  }
+  
+  container.style.display = 'block';
+}
+
+// Cancel upload
+document.getElementById('uploadCancel').addEventListener('click', () => {
+  currentUploadFile = null;
+  currentUploadType = null;
+  document.getElementById('uploadContainer').style.display = 'none';
+  document.getElementById('uploadPreview').innerHTML = '';
+});
+
+// Send uploaded file
+document.getElementById('uploadSend').addEventListener('click', async () => {
+  if (!currentUploadFile) return;
+  
+  const formData = new FormData();
+  formData.append('file', currentUploadFile);
+  formData.append('type', currentUploadType);
+  formData.append('sessionId', getSessionId());
+  
+  // Show loading
+  showLoading();
+  
+  try {
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Add message to chat
+      addMessageToChat(`📎 *File terupload:* ${currentUploadFile.name}`, 'user');
+      
+      // Process file with AI
+      const aiResponse = await fetch('/api/process-file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: result.filename,
+          filepath: result.filepath,
+          type: currentUploadType,
+          sessionId: getSessionId()
+        })
+      });
+      
+      const aiResult = await aiResponse.json();
+      addMessageToChat(aiResult.response, 'ai');
+    } else {
+      showToast('Gagal upload file: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Upload error:', error);
+    showToast('Error: ' + error.message);
+  } finally {
+    hideLoading();
+    currentUploadFile = null;
+    document.getElementById('uploadContainer').style.display = 'none';
+    document.getElementById('uploadPreview').innerHTML = '';
+  }
+});
+
 function setHeroVisibility() {
   const anyMsg = chatWrap.querySelector(".msg-row");
   hero.classList.toggle("hide", Boolean(anyMsg));
