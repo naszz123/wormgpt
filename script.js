@@ -292,7 +292,7 @@ $("menuBtn").addEventListener("click", () => toggleSidebar());
 $("sideClose").addEventListener("click", closeSidebar);
 sidebarBackdrop.addEventListener("click", closeSidebar);
 
-$("telegramBtn").addEventListener("click", () => window.open("https://t.me/pherine", "_blank", "noopener,noreferrer"));
+$("telegramBtn").addEventListener("click", () => window.open("https://t.me/NASZ_01", "_blank", "noopener,noreferrer"));
 $("newChatTopBtn").addEventListener("click", startNewChat);
 
 $("plusBtn").addEventListener("click", () => toastShow("Fiture ini masih dalam pemeliharaan"));
